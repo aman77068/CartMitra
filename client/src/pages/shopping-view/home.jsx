@@ -65,19 +65,28 @@ function ShoppingHome() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  const defaultBanners = [bannerOne, bannerTwo, bannerThree];
+
   // ✅ FALLBACK + API IMAGES
   const banners =
     featureImageList && featureImageList.length > 0
-      ? featureImageList.map(
-          (item) => item.image || item.url || item.imageUrl
-        )
-      : [bannerOne, bannerTwo, bannerThree];
+      ? featureImageList
+          .map((item) => item.image || item.url || item.imageUrl)
+          .filter(Boolean)
+      : defaultBanners;
+
+  const resolvedBanners = banners.length ? banners : defaultBanners;
+
+  const handleBannerError = (event, index) => {
+    event.currentTarget.src = defaultBanners[index] || defaultBanners[0];
+  };
 
   function handleNavigateToListingPage(item, section) {
     sessionStorage.removeItem("filters");
     const currentFilter = {
       [section]: [item.id],
     };
+
     sessionStorage.setItem("filters", JSON.stringify(currentFilter));
     navigate(`/shop/listing`);
   }
@@ -130,11 +139,12 @@ function ShoppingHome() {
     <div className="flex flex-col min-h-screen">
       {/* ✅ SLIDER */}
       <div className="relative w-full h-[600px] overflow-hidden">
-        {banners.map((img, index) => (
+        {resolvedBanners.map((img, index) => (
           <img
             key={index}
             src={img}
             alt="banner"
+            onError={(event) => handleBannerError(event, index)}
             className={`${
               index === currentSlide ? "opacity-100" : "opacity-0"
             } absolute top-0 left-0 w-full h-full object-cover transition-opacity duration-1000`}
