@@ -6,6 +6,8 @@ const cors = require("cors");
 const authRouter = require("./routes/auth/auth-routes");
 const adminProductsRouter = require("./routes/admin/products-routes");
 const adminOrderRouter = require("./routes/admin/order-routes");
+const Product = require("./models/Product");
+const sampleProducts = require("./data/sample-products");
 
 const shopProductsRouter = require("./routes/shop/products-routes");
 const shopCartRouter = require("./routes/shop/cart-routes");
@@ -21,10 +23,30 @@ const commonFeatureRouter = require("./routes/common/feature-routes");
 
 mongoose
   .connect(process.env.MONGODB_URI)
-  .then(() => console.log("MongoDB connected"))
+  .then(async () => {
+    console.log("MongoDB connected");
+    await seedSampleProducts();
+  })
   .catch((error) => console.log(error));
 
 const app = express();
+
+async function seedSampleProducts() {
+  try {
+    const productCount = await Product.countDocuments();
+
+    if (productCount === 0) {
+      await Product.insertMany(sampleProducts);
+      console.log("Sample products seeded successfully.");
+    } else {
+      console.log(
+        `Sample products not seeded because ${productCount} products already exist.`
+      );
+    }
+  } catch (error) {
+    console.log("Error seeding sample products:", error);
+  }
+}
 const PORT = process.env.PORT || 5001;
 
 app.use(
