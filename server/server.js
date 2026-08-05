@@ -6,8 +6,6 @@ const cors = require("cors");
 const authRouter = require("./routes/auth/auth-routes");
 const adminProductsRouter = require("./routes/admin/products-routes");
 const adminOrderRouter = require("./routes/admin/order-routes");
-const Product = require("./models/Product");
-const seedProducts = require("./data/seed-products");
 
 const shopProductsRouter = require("./routes/shop/products-routes");
 const shopCartRouter = require("./routes/shop/cart-routes");
@@ -23,30 +21,12 @@ const commonFeatureRouter = require("./routes/common/feature-routes");
 
 mongoose
   .connect(process.env.MONGODB_URI)
-  .then(async () => {
+  .then(() => {
     console.log("MongoDB connected");
-    await seedProductCatalog();
   })
   .catch((error) => console.log(error));
 
 const app = express();
-
-async function seedProductCatalog() {
-  try {
-    const productCount = await Product.countDocuments();
-
-    if (productCount === 0) {
-      await Product.insertMany(seedProducts);
-      console.log("Product catalog seeded successfully.");
-    } else {
-      console.log(
-        `Product catalog not seeded because ${productCount} products already exist.`
-      );
-    }
-  } catch (error) {
-    console.log("Error seeding product catalog:", error);
-  }
-}
 const PORT = process.env.PORT || 5001;
 
 app.use(
